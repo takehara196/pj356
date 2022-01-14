@@ -2,30 +2,13 @@
 # -*- coding:utf-8 -*-
 
 import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
 
 
-def make_table():
-    agents_cols = [
+def clustering():
+    use_agents_cols = [
         "id",
-        "email",
-        "encrypted_password",
-        "reset_password_token",
-        "reset_password_sent_at",
-        "remember_created_at",
-        "confirmation_token",
-        "confirmed_at",
-        "confirmation_sent_at",
-        "unconfirmed_email",
-        "created_at",
-        "updated_at",
-        "nickname",
-        "family_name",
-        "first_name",
-        "tel",
-        "budget_min",
-        "budget_max",
-        "desired_area",
-        "residense_type",
         "preference1",
         "preference2",
         "preference3",
@@ -39,32 +22,11 @@ def make_table():
         "needs_2",
         "needs_3",
         "needs_4",
-        "needs_5",
-        "needs_free_text",
-        "avatar"
+        "needs_5"
     ]
 
-    buyers_cols = [
+    use_buyers_cols = [
         "id",
-        "email",
-        "encrypted_password",
-        "reset_password_token",
-        "reset_password_sent_at",
-        "remember_created_at",
-        "confirmation_token",
-        "confirmed_at",
-        "confirmation_sent_at",
-        "unconfirmed_email",
-        "created_at",
-        "updated_at",
-        "nickname",
-        "family_name",
-        "first_name",
-        "tel",
-        "budget_min",
-        "budget_max",
-        "desired_area",
-        "residense_type",
         "preference1",
         "preference2",
         "preference3",
@@ -78,27 +40,48 @@ def make_table():
         "needs_2",
         "needs_3",
         "needs_4",
-        "needs_5",
-        "needs_free_text",
-        "avatar"
+        "needs_5"
     ]
 
-    # レコード数
-    r = 1000
-    agent_df = pd.DataFrame(
-        index=range(r),
-        columns=agents_cols
-    )
+    # agentテーブル
+    r = np.random.randint(1, 5, (50, 15))
+    agent_df = pd.DataFrame(r, columns=use_agents_cols)
+    # idに連番付与
+    serial_num = pd.RangeIndex(start=1, stop=len(agent_df.index) + 1, step=1)
+    agent_df['id'] = serial_num
+    agent_df['id'] = 'agent_' + agent_df['id'].astype(str)
 
-    # preference1, ..., needs_5列にランダムの数値を付与する
+    # buyerテーブル
+    r = np.random.randint(1, 5, (20, 15))
+    buyer_df = pd.DataFrame(r, columns=use_buyers_cols)
+    serial_num = pd.RangeIndex(start=1, stop=len(buyer_df.index) + 1, step=1)
+    buyer_df['id'] = serial_num
+    buyer_df['id'] = 'buyer_' + buyer_df['id'].astype(str)
 
-    print(agent_df)
+    # agent, buyerテーブルを結合
+    df = pd.concat([agent_df, buyer_df])
+    # idカラムをindexに指定
+    df = df.set_index("id")
+
+    # データを4クラスに分割、乱数固定
+    model_kmeans = KMeans(n_clusters=4, random_state=0)
+    # 学習、フィッティング
+    model_kmeans.fit(df.values)
+    # 学習済みデータの重心点
+    # print(model_kmeans.cluster_centers_)
+    # 重心点の形状
+    # print(model_kmeans.cluster_centers_.shape)
+    # 作成したモデルでクラスタリング
+    cluster = model_kmeans.predict(df.values)
+    df_class = df.copy()
+    df_class['クラス'] = cluster
+    print(df_class)
 
     return
 
 
 def main():
-    make_table()
+    clustering()
 
 
 if __name__ == '__main__':
