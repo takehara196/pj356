@@ -80,8 +80,13 @@ def clustering():
     return
 
 
+def insert_db():
+    return
+
+
 def main():
     clustering()
+    insert_db()
 
 
 if __name__ == '__main__':
